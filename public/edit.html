@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puppy Editor</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+</head>
+<body>
+    <h1>Edit</h1>
+    <div id="app">
+        <div id="editor" ref="editor"></div>
+        <button class="btn btn-primary" @click="handleSave">
+            {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+        <div v-if="showSaved" class="alert alert-success" role="alert">
+            Saved!
+        </div>
+
+        {{frontMatter}}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const filePath = urlParams.get('path');
+
+        new Vue({
+            el: '#app',
+            data: {
+                files: [],
+                quill: null,
+                saving: false,
+                showSaved: false,
+                frontMatter: "",
+            },
+            methods: {
+                handleSave() {
+                    const content = this.frontMatter + '\n' + this.quill.root.innerHTML;
+                    this.saving = true;
+
+                    fetch(`/api/file?path=${filePath}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ content }),
+                    })
+                        .then(response => response.text())
+                        .then(data => {
+                            this.saving = false;
+                            this.showSaved = true;
+                            setTimeout(() => {
+                                this.showSaved = false;
+                            }, 2000);
+                            console.log(data);
+                        })
+
+                },
+                extractFrontMatter(content) {
+                    // populate frontmatter and return content without frontmatter
+                    // simply extract frontmatter lines, dont parse. just a string
+                    const separator = '---';
+                    const indexOfFirstDashes = content.indexOf(separator);
+                    const indexOfSecondDashes = content.indexOf(separator, indexOfFirstDashes + 1);
+                    if (indexOfFirstDashes === -1 || indexOfSecondDashes === -1) {
+                        this.frontMatter = "";
+                        return content;
+                    }
+
+                    const matterEnd = indexOfSecondDashes + separator.length;
+                    this.frontMatter = content.slice(indexOfFirstDashes, matterEnd);
+                    return content.slice(matterEnd).trim();
+                }
+            },
+            beforeMount() {
+                fetch(`/api/file?path=${filePath}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        this.$refs.editor.innerHTML = this.extractFrontMatter(data);
+
+                        this.quill = new Quill('#editor', {
+                            theme: 'snow',
+                        });
+                    });
+            },
+        })
+    </script>
+</body>
+</html>

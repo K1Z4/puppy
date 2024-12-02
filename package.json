@@ -1,0 +1,22 @@
+{
+    "name": "puppy",
+    "version": "1.0.0",
+    "description": "An Express web app to edit HTML files",
+    "main": "src/app.js",
+    "type": "module",
+    "scripts": {
+      "start": "node src/app.js",
+      "dev": "nodemon src/app.js"
+    },
+    "bin": {
+      "puppy": "./bin/www"
+    },
+    "dependencies": {
+      "express": "^4.19.2",
+      "open": "^10.1.0"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}
+  

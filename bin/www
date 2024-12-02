@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+import open from 'open';
+import app from '../src/app.js';
+
+const PORT = process.env.PORT || 3001;
+
+// Open the default browser
+(async () => {
+    await open(`http://localhost:${PORT}`);
+})();

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puppy Editor</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <h1>Puppy Editor!</h1>
+    <p>Edit your .html files here.</p>
+    <div id="app">
+        <ul>
+            <li v-for="file in files">
+                <a :href="'/edit.html?path=' + file.path">{{ file }}</a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                files: [],
+            },
+            beforeMount() {
+                fetch('/api/file/list')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.files = data;
+                    });
+            },
+        })
+    </script>
+</body>
+</html>
